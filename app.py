@@ -1,4 +1,4 @@
-import time
+﻿import time
 from pathlib import Path
 
 import gradio as gr
@@ -40,10 +40,10 @@ def prompt_safety_html(result):
         detail = "No restricted content detected."
     elif decision == "RESTRICT":
         label = "RESTRICT"
-        detail = f"{category or 'Sensitive content'} · {reason}"
+        detail = f"{category or 'Sensitive content'} Ã‚| {reason}"
     else:
         label = "BLOCK"
-        detail = f"{category or 'High-risk content'} · {reason}"
+        detail = f"{category or 'High-risk content'} Ã‚| {reason}"
 
     return f"""
     <div class="status-row">
@@ -162,7 +162,7 @@ def generate_t2i(prompt):
             prompt_safety_html(result.get("prompt_safety")),
             output_safety_html(result.get("safety")),
             privacy_html(result.get("privacy_receipt")),
-            f"Generated locally · {time_text}",
+            f"Generated locally Ã‚| {time_text}",
             result.get("output")
         )
 
@@ -235,7 +235,7 @@ def generate_i2i(input_image, prompt):
             prompt_safety_html(result.get("prompt_safety")),
             output_safety_html(result.get("output_safety")),
             privacy_html(result.get("privacy_receipt")),
-            f"Edited locally · {time_text}",
+            f"Edited locally Ã‚| {time_text}",
             result.get("output")
         )
 
@@ -255,1237 +255,798 @@ def generate_i2i(input_image, prompt):
 # ============================================================
 
 def clear_t2i():
-    return None, "", "", "", "", None
-
+    return None, "", "", "", None
 
 def clear_i2i():
-    return None, "", "", "", "", None
+    return None, "", "", "", None
 
 
 # ============================================================
 # CSS
 # ============================================================
 
-CSS = """
 
-/* ============================================================
-   WITHIN — Visual System v2
-   ============================================================ */
+# ============================================================
+# WITHIN â€” AIR-GAPPED VAULT UI
+# ============================================================
 
+VAULT_CSS = r"""
 :root {
-    --bg: #101827;
-    --bg-deep: #0b1220;
-    --panel: #162033;
-    --panel-raised: #1b2940;
-    --panel-soft: #202e45;
-
-    --border: #2a3a52;
-    --border-bright: #3b506d;
-
-    --text: #edf4ff;
-    --text-soft: #c5d1e2;
-    --muted: #8fa0b7;
-    --dim: #667993;
-
-    --indigo: #6366f1;
-    --indigo-light: #818cf8;
-    --cyan: #22d3ee;
-    --cyan-soft: rgba(34,211,238,0.12);
-
-    --success: #5eead4;
-    --danger: #fb7185;
-
-    --shadow: rgba(0,0,0,0.32);
+    --obsidian: #090B0E;
+    --slate: #11161D;
+    --steel: #1A222D;
+    --void: #0B0D11;
+    --wire: #263342;
+    --amber: #F59E0B;
+    --amber-hover: #D97706;
+    --teal: #06B6D4;
+    --green: #10B981;
+    --red: #EF4444;
+    --text: #E5E7EB;
+    --muted: #7F8A99;
+    --dim: #566170;
 }
-
-/* ============================================================
-   BASE
-   ============================================================ */
 
 * {
     box-sizing: border-box;
 }
 
-body {
-    background: var(--bg-deep) !important;
+body,
+.gradio-container {
+    background: var(--obsidian) !important;
     color: var(--text) !important;
-    font-family:
-        Inter,
-        "Segoe UI",
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        sans-serif !important;
-    font-size: 15px !important;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
 .gradio-container {
-    max-width: none !important;
+    max-width: 1600px !important;
+    margin: auto !important;
     padding: 0 !important;
-
-    background:
-        radial-gradient(
-            circle at 78% 8%,
-            rgba(99,102,241,0.14),
-            transparent 28%
-        ),
-        radial-gradient(
-            circle at 12% 88%,
-            rgba(34,211,238,0.07),
-            transparent 25%
-        ),
-        linear-gradient(
-            135deg,
-            #0b1220 0%,
-            #101827 48%,
-            #111c2e 100%
-        ) !important;
 }
 
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
+/* ---------- TOP DIAGNOSTIC BAR ---------- */
 
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #0d1523;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #34465f;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #4a607e;
-}
-
-/* ============================================================
-   TEXT
-   ============================================================ */
-
-h1,
-h2,
-h3,
-h4,
-p,
-label {
-    color: var(--text) !important;
-}
-
-h1 {
-    font-weight: 700 !important;
-    letter-spacing: -0.035em !important;
-}
-
-h2 {
-    font-weight: 650 !important;
-    letter-spacing: -0.025em !important;
-}
-
-label span {
-    color: var(--text-soft) !important;
-    font-size: 13px !important;
-    font-weight: 550 !important;
-}
-
-/* ============================================================
-   TOP BAR
-   ============================================================ */
-
-.topbar {
-    height: 70px;
-    padding: 0 30px !important;
-
-    background: rgba(11,18,32,0.94) !important;
-    border-bottom: 1px solid var(--border);
-
+.vault-topbar {
+    min-height: 58px;
+    background: #0D1116;
+    border-bottom: 1px solid var(--wire);
     display: flex;
     align-items: center;
-
-    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    justify-content: space-between;
+    padding: 0 22px;
+    gap: 18px;
 }
 
-.brand {
+.vault-brand {
     display: flex;
     align-items: center;
-    gap: 13px;
+    gap: 11px;
+    min-width: 245px;
 }
 
-.brand-mark {
-    width: 36px;
-    height: 36px;
+.vault-mark {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--teal);
+    background: rgba(6,182,212,.06);
+    display: grid;
+    place-items: center;
+    color: var(--teal);
+    font-family: monospace;
+    font-size: 13px;
+    box-shadow: 0 0 16px rgba(6,182,212,.10);
+}
 
-    border: 1px solid rgba(99,102,241,0.8);
-    border-radius: 9px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #ffffff;
-    font-size: 14px;
+.vault-brand-name {
+    font-size: 15px;
     font-weight: 750;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(99,102,241,0.3),
-            rgba(34,211,238,0.14)
-        );
-
-    box-shadow:
-        0 0 25px rgba(99,102,241,0.16),
-        inset 0 0 18px rgba(34,211,238,0.05);
+    letter-spacing: .16em;
 }
 
-.brand-name {
-    font-size: 20px !important;
-    font-weight: 750 !important;
-    letter-spacing: 0.08em !important;
-}
-
-.brand-subtitle {
-    color: var(--muted) !important;
-    font-size: 12px !important;
-    letter-spacing: 0.045em;
-}
-
-/* ============================================================
-   LAYOUT
-   ============================================================ */
-
-.main-layout {
-    min-height: calc(100vh - 70px);
-}
-
-.sidebar {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(22,32,51,0.96),
-            rgba(13,21,35,0.98)
-        ) !important;
-
-    border-right: 1px solid var(--border);
-
-    padding: 28px 22px !important;
-
-    box-shadow: 10px 0 35px rgba(0,0,0,0.12);
-}
-
-.workspace-area {
-    padding: 34px 38px 44px !important;
-    background: transparent !important;
-}
-
-/* ============================================================
-   MODE TABS
-   ============================================================ */
-
-.mode-tabs {
-    background: rgba(22,32,51,0.8) !important;
-
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-
-    padding: 5px !important;
-
-    box-shadow:
-        inset 0 1px rgba(255,255,255,0.025),
-        0 10px 30px rgba(0,0,0,0.12);
-}
-
-.mode-tabs button {
-    min-height: 42px !important;
-
-    border: 0 !important;
-    border-radius: 7px !important;
-
-    background: transparent !important;
-
-    color: var(--muted) !important;
-
-    font-size: 14px !important;
-    font-weight: 600 !important;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.mode-tabs button:hover {
-    background: rgba(99,102,241,0.09) !important;
-    color: var(--text) !important;
-}
-
-.mode-tabs button.selected {
-    background:
-        linear-gradient(
-            135deg,
-            rgba(99,102,241,0.24),
-            rgba(34,211,238,0.08)
-        ) !important;
-
-    color: #ffffff !important;
-
-    box-shadow:
-        inset 0 0 0 1px rgba(99,102,241,0.38),
-        0 5px 20px rgba(99,102,241,0.08);
-}
-
-/* ============================================================
-   MAIN HEADINGS
-   ============================================================ */
-
-.workspace-title {
-    font-size: clamp(34px, 4vw, 52px) !important;
-    line-height: 1.02 !important;
-
-    font-weight: 720 !important;
-
-    letter-spacing: -0.055em !important;
-
-    margin-bottom: 12px !important;
-
-    background:
-        linear-gradient(
-            100deg,
-            #ffffff 15%,
-            #dbeafe 55%,
-            #a5f3fc 100%
-        );
-
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.workspace-subtitle {
-    max-width: 720px;
-
-    color: var(--muted) !important;
-
-    font-size: 15px !important;
-    line-height: 1.7 !important;
-}
-
-/* ============================================================
-   PANELS
-   ============================================================ */
-
-.panel {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(27,41,64,0.92),
-            rgba(19,30,48,0.94)
-        ) !important;
-
-    border: 1px solid var(--border) !important;
-
-    border-radius: 11px !important;
-
-    box-shadow:
-        0 18px 45px var(--shadow),
-        inset 0 1px rgba(255,255,255,0.025);
-}
-
-.panel-header {
-    padding: 17px 20px !important;
-
-    border-bottom: 1px solid rgba(42,58,82,0.85);
-}
-
-.panel-title {
-    font-size: 12px !important;
-    font-weight: 700 !important;
-
-    text-transform: uppercase;
-    letter-spacing: 0.13em;
-
-    color: var(--text-soft) !important;
-}
-
-/* ============================================================
-   INPUTS
-   ============================================================ */
-
-textarea,
-input,
-.gr-input,
-.gr-text-input {
-    background: rgba(11,18,32,0.88) !important;
-
-    color: var(--text) !important;
-
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-
-    font-size: 15px !important;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-}
-
-textarea {
-    line-height: 1.65 !important;
-    padding: 14px !important;
-}
-
-textarea:focus,
-input:focus {
-    border-color: rgba(99,102,241,0.85) !important;
-
-    background: rgba(13,22,38,0.98) !important;
-
-    box-shadow:
-        0 0 0 3px rgba(99,102,241,0.11),
-        0 0 30px rgba(34,211,238,0.04) !important;
-}
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-button {
-    font-family: inherit !important;
-    font-size: 14px !important;
-}
-
-button.primary {
-    min-height: 46px !important;
-
-    background:
-        linear-gradient(
-            135deg,
-            #6366f1,
-            #4f46e5
-        ) !important;
-
-    color: white !important;
-
-    border: 1px solid rgba(129,140,248,0.7) !important;
-
-    border-radius: 8px !important;
-
-    font-size: 14px !important;
-    font-weight: 700 !important;
-
-    box-shadow:
-        0 8px 25px rgba(79,70,229,0.23),
-        inset 0 1px rgba(255,255,255,0.12);
-
-    transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease,
-        filter 0.18s ease;
-}
-
-button.primary:hover {
-    filter: brightness(1.1);
-
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 12px 32px rgba(79,70,229,0.3),
-        0 0 20px rgba(34,211,238,0.07);
-}
-
-button.secondary {
-    min-height: 42px !important;
-
-    background: rgba(27,41,64,0.8) !important;
-
-    color: var(--text-soft) !important;
-
-    border: 1px solid var(--border) !important;
-
-    border-radius: 8px !important;
-
-    font-weight: 600 !important;
-}
-
-button.secondary:hover {
-    background: var(--panel-soft) !important;
-    border-color: var(--border-bright) !important;
-    color: #ffffff !important;
-}
-
-/* ============================================================
-   IMAGE / CREATIVE CANVAS
-   ============================================================ */
-
-.image-workspace {
-    min-height: 520px;
-
-    background:
-        radial-gradient(
-            circle at 50% 48%,
-            rgba(99,102,241,0.13),
-            transparent 23%
-        ),
-        radial-gradient(
-            circle at 50% 48%,
-            rgba(34,211,238,0.07),
-            transparent 42%
-        ),
-        linear-gradient(
-            rgba(255,255,255,0.018) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,0.018) 1px,
-            transparent 1px
-        ),
-        #0c1524 !important;
-
-    background-size:
-        auto,
-        auto,
-        32px 32px,
-        32px 32px,
-        auto !important;
-
-    border: 1px solid var(--border-bright) !important;
-
-    border-radius: 11px !important;
-
-    position: relative;
-
-    overflow: hidden;
-
-    box-shadow:
-        0 25px 60px rgba(0,0,0,0.28),
-        inset 0 0 70px rgba(34,211,238,0.025);
-}
-
-.image-workspace::before {
-    content: "";
-
-    position: absolute;
-
-    width: 170px;
-    height: 170px;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    border: 1px solid rgba(99,102,241,0.18);
-
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 0 28px rgba(99,102,241,0.035),
-        0 0 0 58px rgba(34,211,238,0.018);
-
-    pointer-events: none;
-}
-
-.image-workspace::after {
-    content: "LOCAL INFERENCE   •   DEVICE PROCESSING";
-
-    position: absolute;
-
-    right: 20px;
-    bottom: 16px;
-
-    color: rgba(191,219,254,0.3);
-
-    font-size: 9px;
-
-    font-weight: 600;
-
-    letter-spacing: 0.14em;
-
-    pointer-events: none;
-}
-
-.canvas {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-/* ============================================================
-   CAPABILITY CHIPS
-   ============================================================ */
-
-.capability-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.capability {
-    padding: 7px 11px;
-
-    background: rgba(27,41,64,0.82);
-
+.vault-version {
     color: var(--muted);
-
-    border: 1px solid var(--border);
-
-    border-radius: 6px;
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    letter-spacing: 0.02em;
-
-    transition:
-        border-color 0.18s ease,
-        background 0.18s ease,
-        color 0.18s ease;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 10px;
+    letter-spacing: .06em;
 }
 
-.capability:hover {
-    background: rgba(99,102,241,0.09);
-    border-color: rgba(99,102,241,0.4);
-    color: var(--text-soft);
-}
-
-.capability.active {
-    color: #c7f9ff;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(99,102,241,0.12),
-            rgba(34,211,238,0.08)
-        );
-
-    border-color: rgba(34,211,238,0.25);
-}
-
-/* ============================================================
-   SAFETY / PRIVACY
-   ============================================================ */
-
-.safety-card,
-.privacy-card {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(27,41,64,0.85),
-            rgba(18,29,46,0.9)
-        ) !important;
-
-    border: 1px solid var(--border) !important;
-
-    border-radius: 8px !important;
-
-    padding: 14px !important;
-
-    box-shadow: inset 0 1px rgba(255,255,255,0.02);
-}
-
-.status-success {
-    color: var(--success) !important;
-}
-
-.status-danger {
-    color: var(--danger) !important;
-}
-
-.status-muted {
-    color: var(--muted) !important;
-}
-
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
-
-.empty-state {
-    min-height: 380px;
-
+.vault-diagnostics {
     display: flex;
-
     align-items: center;
     justify-content: center;
-
-    text-align: center;
+    gap: 9px;
+    flex: 1;
+    flex-wrap: wrap;
 }
 
-.empty-state-core {
-    width: 82px;
-    height: 82px;
-
-    margin: 0 auto 25px;
-
-    border: 1px solid rgba(129,140,248,0.65);
-
-    border-radius: 22px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    color: #c7d2fe;
-
-    font-size: 24px;
-    font-weight: 750;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(99,102,241,0.18),
-            rgba(34,211,238,0.04)
-        );
-
-    box-shadow:
-        0 0 45px rgba(99,102,241,0.13),
-        inset 0 0 25px rgba(34,211,238,0.05);
+.diag {
+    border: 1px solid var(--wire);
+    background: #10151B;
+    padding: 7px 10px;
+    color: #B9C1CB;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 10px;
+    letter-spacing: .02em;
 }
 
-.empty-state-core::before,
-.empty-state-core::after {
-    content: "";
-
-    position: absolute;
-
-    border: 1px solid rgba(129,140,248,0.14);
-
-    border-radius: 50%;
-
-    pointer-events: none;
+.diag-green {
+    color: #9BE8C8;
+    border-color: rgba(16,185,129,.28);
 }
 
-.empty-state-core::before {
-    width: 130px;
-    height: 130px;
+.diag-teal {
+    color: #8DEAF8;
+    border-color: rgba(6,182,212,.28);
 }
 
-.empty-state-core::after {
-    width: 190px;
-    height: 190px;
-
-    border-color: rgba(34,211,238,0.07);
+.vault-gpu {
+    min-width: 185px;
+    text-align: right;
+    color: #AAB3BE;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 10px;
 }
 
-.empty-state-title {
-    font-size: 25px;
+/* ---------- WORKSPACE ---------- */
 
-    font-weight: 650;
-
-    letter-spacing: -0.025em;
+.vault-main {
+    padding: 18px;
 }
 
-.empty-state-copy {
-    max-width: 470px;
+.workspace-tabs {
+    background: transparent !important;
+    border: 0 !important;
+}
 
-    margin: 10px auto 0;
+.workspace-tabs > .tab-nav {
+    border-bottom: 1px solid var(--wire) !important;
+    background: transparent !important;
+    gap: 4px;
+}
 
+.workspace-tabs > .tab-nav button {
     color: var(--muted) !important;
-
-    line-height: 1.65;
-
-    font-size: 14px;
-}
-
-/* ============================================================
-   METADATA
-   ============================================================ */
-
-.metadata-bar {
-    border-top: 1px solid var(--border);
-
-    color: var(--dim) !important;
-
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    padding: 13px 18px !important;
+    font-family: "JetBrains Mono", "Fira Code", monospace !important;
     font-size: 11px !important;
-
-    letter-spacing: 0.045em;
-
-    padding-top: 11px !important;
+    letter-spacing: .05em !important;
 }
 
-/* ============================================================
-   FILES
-   ============================================================ */
-
-.file-preview,
-.file-container {
-    background: rgba(11,18,32,0.8) !important;
-
-    border-color: var(--border) !important;
-
-    border-radius: 8px !important;
+.workspace-tabs > .tab-nav button.selected {
+    color: #F3F4F6 !important;
+    border-bottom-color: var(--amber) !important;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* ---------- PANELS ---------- */
 
-@media (max-width: 1100px) {
-    .workspace-area {
-        padding: 28px 24px 36px !important;
-    }
-
-    .workspace-title {
-        font-size: 38px !important;
-    }
+.rack,
+.viewport-panel,
+.ledger-panel {
+    background: var(--slate) !important;
+    border: 1px solid var(--wire) !important;
+    border-radius: 3px !important;
 }
 
-@media (max-width: 900px) {
-    .topbar {
-        height: 62px;
-        padding: 0 18px !important;
-    }
-
-    .sidebar {
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
-        padding: 20px !important;
-    }
-
-    .workspace-area {
-        padding: 22px 18px 30px !important;
-    }
-
-    .workspace-title {
-        font-size: 32px !important;
-    }
-
-    .image-workspace {
-        min-height: 420px;
-    }
+.rack {
+    padding: 18px !important;
 }
 
+.panel-heading {
+    color: #D7DCE2;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 13px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.panel-subheading {
+    color: var(--muted);
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-top: 18px;
+    margin-bottom: 7px;
+}
+
+/* ---------- INPUTS ---------- */
+
+.vault-input textarea,
+.vault-input input {
+    background: var(--void) !important;
+    border: 1px solid var(--wire) !important;
+    border-radius: 2px !important;
+    color: #E5E7EB !important;
+    font-family: Inter, sans-serif !important;
+    font-size: 18px !important;
+}
+
+.vault-input textarea:focus,
+.vault-input input:focus {
+    border-color: rgba(6,182,212,.65) !important;
+    box-shadow: 0 0 0 1px rgba(6,182,212,.10) !important;
+}
+
+.vault-image-input {
+    background: var(--void) !important;
+    border: 1px dashed #394756 !important;
+    border-radius: 2px !important;
+}
+
+/* ---------- EXECUTION BUTTON ---------- */
+
+.execute-btn {
+    width: 100% !important;
+    min-height: 46px !important;
+    margin-top: 18px !important;
+    background: var(--amber) !important;
+    color: #17100A !important;
+    border: 1px solid #FBBF24 !important;
+    border-radius: 2px !important;
+    font-weight: 800 !important;
+    font-family: "JetBrains Mono", "Fira Code", monospace !important;
+    font-size: 13px !important;
+    letter-spacing: .07em !important;
+}
+
+.execute-btn:hover {
+    background: var(--amber-hover) !important;
+}
+
+.execute-btn:active {
+    background: #B45309 !important;
+}
+
+/* ---------- VIEWPORT ---------- */
+
+.viewport-panel {
+    padding: 12px !important;
+}
+
+.pipeline {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+}
+
+.pipeline-node {
+    padding: 8px 10px;
+    border: 1px solid var(--wire);
+    background: #0D1218;
+    color: var(--muted);
+    font: 9px "JetBrains Mono", monospace;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.pipeline-arrow {
+    color: #46515F;
+    font-family: monospace;
+}
+
+.pipeline-pass {
+    color: #8BE5C1;
+    border-color: rgba(16,185,129,.32);
+    background: rgba(16,185,129,.06);
+}
+
+.pipeline-block {
+    color: #FF9A9A;
+    border-color: rgba(239,68,68,.45);
+    background: rgba(239,68,68,.08);
+}
+
+/* ---------- IMAGE FRAME ---------- */
+
+.image-frame {
+    min-height: 490px;
+    background:
+        linear-gradient(rgba(38,51,66,.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(38,51,66,.12) 1px, transparent 1px),
+        #090C10;
+    background-size: 32px 32px;
+    border: 1px dashed #344252;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-frame:before,
+.image-frame:after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    opacity: .45;
+}
+
+.image-frame:before {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #263342;
+}
+
+.image-frame:after {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #263342;
+}
+
+.image-frame img {
+    position: relative;
+    z-index: 2;
+}
+
+.idle-frame {
+    min-height: 490px;
+    display: grid;
+    place-items: center;
+    color: #475361;
+    font: 10px "JetBrains Mono", monospace;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+/* ---------- LEDGER ---------- */
+
+.ledger-panel {
+    margin-top: 10px;
+    padding: 15px !important;
+}
+
+.ledger-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #DDE3E9;
+    font: 11px "JetBrains Mono", monospace;
+    letter-spacing: .11em;
+}
+
+.ledger-state {
+    color: var(--teal);
+    font-size: 9px;
+    letter-spacing: .08em;
+}
+
+.ledger-grid {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 7px 12px;
+    margin-top: 13px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+}
+
+.ledger-key {
+    color: #5F6B79;
+}
+
+.ledger-value {
+    color: #AEB8C3;
+    overflow-wrap: anywhere;
+}
+
+.ledger-note {
+    margin-top: 13px;
+    padding-top: 10px;
+    border-top: 1px solid #202B37;
+    color: #74808E;
+    font: 9px "JetBrains Mono", monospace;
+    line-height: 1.6;
+}
+
+.status-box {
+    margin-top: 10px;
+    border: 1px solid var(--wire);
+    background: #0C1015;
+    padding: 11px;
+    font: 10px "JetBrains Mono", monospace;
+    line-height: 1.55;
+}
+
+.status-box:empty {
+    display: none;
+}
+
+.status-box h4,
+.status-box p {
+    margin: 0;
+}
+
+@media (max-width: 1050px) {
+    .vault-topbar {
+        flex-wrap: wrap;
+        padding: 10px 14px;
+    }
+
+    .vault-diagnostics {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .vault-gpu {
+        min-width: auto;
+    }
+
+    .image-frame,
+    .idle-frame {
+        min-height: 380px;
+    }
+}
 """
 
-
-# ============================================================
-# UI
-# ============================================================
-
-with gr.Blocks(title="WITHIN") as app:
-
-    # --------------------------------------------------------
-    # COMPACT HEADER
-    # --------------------------------------------------------
-
-    with gr.Column(elem_classes="app-shell"):
-
-        with gr.Row(
-            elem_classes="topbar",
-            equal_height=True
-        ):
-
-            with gr.Row(
-                elem_classes="brand-area",
-                
-
-            ):
-                gr.HTML(
-                    """
-                    <div class="brand">WITHIN</div>
-                    <div class="brand-subtitle">
-                        Privacy by Architecture. Safe by Design.
-                    </div>
-                    """
-                )
-
-            # ------------------------------------------------
-            # TABS
-            # ------------------------------------------------
-
-            with gr.Tabs(
-                elem_classes="mode-tabs"
-            ):
-
-                # ====================================================
-                # T2I
-                # ====================================================
-
-                with gr.Tab("TEXT TO IMAGE"):
-
-                    with gr.Row(elem_classes="mode-page"):
-
-                        with gr.Row(elem_classes="workspace"):
-
-                            # ----------------------------------------
-                            # CONTROLS
-                            # ----------------------------------------
-
-                            with gr.Column(
-                                elem_classes="controls",
-                                scale=0
-                            ):
-
-                                gr.HTML(
-                                    '<div class="section-label">PROMPT</div>'
-                                )
-
-                                prompt_t2i = gr.Textbox(
-                                    placeholder=(
-                                        "Describe the image you want to create..."
-                                    ),
-                                    lines=4,
-                                    show_label=False,
-                                    elem_classes="prompt-box"
-                                )
-
-                                generate_t2i_btn = gr.Button(
-                                    "GENERATE",
-                                    elem_classes="generate-btn"
-                                )
-
-                                with gr.Row():
-
-                                    regenerate_t2i_btn = gr.Button(
-                                        "REGENERATE",
-                                        elem_classes="secondary-btn"
-                                    )
-
-                                    clear_t2i_btn = gr.Button(
-                                        "CLEAR",
-                                        elem_classes="secondary-btn"
-                                    )
-
-                                gr.HTML(
-                                    """
-                                    <div class="model-info">
-
-                                        <div class="section-label">
-                                            LOCAL MODEL
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Model
-                                            </span>
-                                            <span class="info-value">
-                                                Stable Diffusion 1.5
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Steps
-                                            </span>
-                                            <span class="info-value">
-                                                15
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Resolution
-                                            </span>
-                                            <span class="info-value">
-                                                512 × 512
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Inference
-                                            </span>
-                                            <span class="info-value">
-                                                Local / CUDA
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                    """
-                                )
-
-                                t2i_prompt_status = gr.HTML()
-
-                                t2i_output_status = gr.HTML()
-
-                                t2i_privacy = gr.HTML()
-
-                            # ----------------------------------------
-                            # IMAGE AREA
-                            # ----------------------------------------
-
-                            with gr.Column(
-                                elem_classes="image-workspace"
-                            ):
-
-                                t2i_output = gr.Image(
-                                    label="",
-                                    show_label=False,
-                                    type="filepath",
-                                    interactive=False,
-                                    elem_classes="canvas"
-                                )
-
-                                t2i_message = gr.HTML()
-
-                                t2i_download = gr.File(
-                                    label="",
-                                    show_label=False,
-                                    interactive=False
-                                )
-
-                                gr.HTML(
-                                    """
-                                    <div class="metadata-bar">
-                                        Local inference · Stable Diffusion 1.5
-                                    </div>
-                                    """
-                                )
-
-
-                # ====================================================
-                # I2I
-                # ====================================================
-
-                with gr.Tab("IMAGE TO IMAGE"):
-
-                    with gr.Row(elem_classes="mode-page"):
-
-                        with gr.Row(elem_classes="workspace"):
-
-                            # ----------------------------------------
-                            # CONTROLS
-                            # ----------------------------------------
-
-                            with gr.Column(
-                                elem_classes="controls",
-                                scale=0
-                            ):
-
-                                gr.HTML(
-                                    '<div class="section-label">SOURCE IMAGE</div>'
-                                )
-
-                                i2i_input = gr.Image(
-                                    label="",
-                                    show_label=False,
-                                    type="filepath",
-                                    interactive=True,
-                                    elem_classes="upload-box"
-                                )
-
-                                gr.HTML(
-                                    '<div class="section-label">EDIT PROMPT</div>'
-                                )
-
-                                prompt_i2i = gr.Textbox(
-                                    placeholder=(
-                                        "Describe how you want to transform the image..."
-                                    ),
-                                    lines=4,
-                                    show_label=False,
-                                    elem_classes="prompt-box"
-                                )
-
-                                generate_i2i_btn = gr.Button(
-                                    "GENERATE",
-                                    elem_classes="generate-btn"
-                                )
-
-                                with gr.Row():
-
-                                    regenerate_i2i_btn = gr.Button(
-                                        "REGENERATE",
-                                        elem_classes="secondary-btn"
-                                    )
-
-                                    clear_i2i_btn = gr.Button(
-                                        "CLEAR",
-                                        elem_classes="secondary-btn"
-                                    )
-
-                                gr.HTML(
-                                    """
-                                    <div class="model-info">
-
-                                        <div class="section-label">
-                                            LOCAL MODEL
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Model
-                                            </span>
-                                            <span class="info-value">
-                                                Stable Diffusion 1.5
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Strength
-                                            </span>
-                                            <span class="info-value">
-                                                0.55
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Steps
-                                            </span>
-                                            <span class="info-value">
-                                                15
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <span class="info-key">
-                                                Inference
-                                            </span>
-                                            <span class="info-value">
-                                                Local / CUDA
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                    """
-                                )
-
-                                i2i_prompt_status = gr.HTML()
-
-                                i2i_output_status = gr.HTML()
-
-                                i2i_privacy = gr.HTML()
-
-                            # ----------------------------------------
-                            # IMAGE AREA
-                            # ----------------------------------------
-
-                            with gr.Column(
-                                elem_classes="image-workspace"
-                            ):
-
-                                i2i_output = gr.Image(
-                                    label="",
-                                    show_label=False,
-                                    type="filepath",
-                                    interactive=False,
-                                    elem_classes="canvas"
-                                )
-
-                                i2i_message = gr.HTML()
-
-                                i2i_download = gr.File(
-                                    label="",
-                                    show_label=False,
-                                    interactive=False
-                                )
-
-                                gr.HTML(
-                                    """
-                                    <div class="metadata-bar">
-                                        Local inference · Stable Diffusion 1.5
-                                    </div>
-                                    """
-                                )
-
-
-            # --------------------------------------------------------
-            # LOCAL STATUS
-            # --------------------------------------------------------
-
-            with gr.Row(
-                elem_classes="local-area",
-                
-
-            ):
-                gr.HTML(
-                    """
-                    <div class="local-status">
-                        <span class="local-dot"></span>
-                        LOCAL
-                    </div>
-                    """
-                )
-
+def vault_header():
+    return """
+    <div class="vault-topbar">
+        <div class="vault-brand">
+            <div class="vault-mark">></div>
+            <div>
+                <div class="vault-brand-name">WITHIN</div>
+                <div class="vault-version">v1.0 | LOCAL ENGINE</div>
+            </div>
+        </div>
+
+        <div class="vault-diagnostics">
+            <div class="diag diag-teal">> ENGINE: SD v1.5 | CUDA fp16 | 15 STEPS</div>
+            <div class="diag diag-green">> SAFETY: COMPVIS NSFW FILTER | LOCAL</div>
+            <div class="diag diag-teal">> LOCAL INFERENCE | OFFLINE TESTED</div>
+        </div>
+
+        <div class="vault-gpu">
+            RTX 3050 | 4 GB MOBILE
+        </div>
+    </div>
+    """
+
+
+def pipeline_html(prompt_result=None, blocked=False, reason=""):
+    if blocked:
+        explanation = f"""
+        <div style="margin-top:7px;color:#ff9a9a;font-size:9px;">
+            INTERCEPTED | {reason}
+        </div>
+        """
+        node1 = f'<div class="pipeline-node pipeline-block">1. PROMPT FILTER | BLOCKED{explanation}</div>'
+        node2 = '<div class="pipeline-node">2. LOCAL SD 1.5 | SKIPPED</div>'
+        node3 = '<div class="pipeline-node">3. COMPVIS SAFETY | SKIPPED</div>'
+    else:
+        node1 = '<div class="pipeline-node pipeline-pass">1. PROMPT FILTER | PASS</div>'
+        node2 = '<div class="pipeline-node">2. LOCAL SD 1.5 | EXECUTED</div>'
+        node3 = '<div class="pipeline-node pipeline-pass">3. COMPVIS SAFETY | CHECKED</div>'
+
+    return f"""
+    <div class="pipeline">
+        {node1}
+        <span class="pipeline-arrow">></span>
+        {node2}
+        <span class="pipeline-arrow">></span>
+        {node3}
+    </div>
+    """
+
+
+def idle_html(label="AWAITING LOCAL EXECUTION"):
+    return f"""
+    <div class="idle-frame">
+        <div>
+            <div style="text-align:center;font-size:18px;color:#344252;margin-bottom:8px;">+</div>
+            {label}
+        </div>
+    </div>
+    """
+
+
+def ledger_shell(mode):
+    operation = "Text-to-Image" if mode == "t2i" else "Image-to-Image"
+    return f"""
+    <div class="ledger-panel">
+        <div class="ledger-title">
+            <span>LOCAL EXECUTION LEDGER</span>
+            <span class="ledger-state">> SELF-CONTAINED RUN</span>
+        </div>
+        <div class="ledger-grid">
+            <div class="ledger-key">OPERATION</div>
+            <div class="ledger-value">{operation}</div>
+            <div class="ledger-key">TARGET DISK</div>
+            <div class="ledger-value">outputs/within_{mode}_final.png</div>
+            <div class="ledger-key">MODEL</div>
+            <div class="ledger-value">stable-diffusion-v1-5/stable-diffusion-v1-5</div>
+            <div class="ledger-key">SAFETY</div>
+            <div class="ledger-value">CompVis Safety Checker | local</div>
+            <div class="ledger-key">NETWORK</div>
+            <div class="ledger-value">TESTED WITH NETWORK DISABLED</div>
+        </div>
+        <div class="ledger-note">
+            Local inference and receipt generation were verified with network connectivity disabled.
+            The Privacy Receipt records the operation, processing state, safety results and SHA-256 output digest.
+        </div>
+    </div>
+    """
+
+
+with gr.Blocks(
+    title="WITHIN | Air-Gapped Vault",
+    theme=gr.themes.Base(
+        primary_hue="amber",
+        secondary_hue="cyan",
+        neutral_hue="slate"
+    ),
+    css=VAULT_CSS
+) as app:
+
+    gr.HTML(vault_header())
+
+    with gr.Column(elem_classes="vault-main"):
+
+        with gr.Tabs(elem_classes="workspace-tabs"):
+
+            # ========================================================
+            # TEXT TO IMAGE
+            # ========================================================
+
+            with gr.Tab("TEXT-TO-IMAGE"):
+
+                with gr.Row(equal_height=False):
+
+                    with gr.Column(scale=3, elem_classes="rack"):
+
+                        gr.HTML("""
+                        <div class="panel-heading">CONTROL RACK / GENERATION</div>
+                        <div style="color:#697584;font:10px 'JetBrains Mono',monospace;line-height:1.6;">
+                            LOCAL CREATIVE ENGINE<br>
+                        </div>
+                        """)
+
+                        gr.HTML('<div class="panel-subheading">Prompt Input</div>')
+
+                        t2i_prompt = gr.Textbox(
+                            placeholder="Describe the image to generate locally...",
+                            lines=8,
+                            show_label=False,
+                            elem_classes="vault-input"
+                        )
+
+                        t2i_run = gr.Button(
+                            "INITIALIZE LOCAL GENERATION",
+                            variant="primary",
+                            elem_classes="execute-btn"
+                        )
+                        t2i_clear = gr.Button(
+                            "CLEAR / RESET",
+                            variant="secondary"
+                        )
+
+                        gr.HTML("""
+                        <div style="
+                            margin-top:16px;
+                            padding:10px;
+                            border:1px solid #263342;
+                            background:#0C1015;
+                            color:#64707E;
+                            font:9px 'JetBrains Mono',monospace;
+                            line-height:1.65;
+                        ">
+                            MODEL LOAD: LOCAL<br>
+                            NETWORK: NOT REQUIRED FOR INFERENCE<br>
+                            SAFETY: PRE + POST GENERATION
+                        </div>
+                        """)
+
+                    with gr.Column(scale=7, elem_classes="viewport-panel"):
+
+                        t2i_pipeline_status = gr.HTML(
+                            pipeline_html(),
+                            elem_classes="pipeline-container"
+                        )
+
+                        t2i_output = gr.Image(
+                            label="LOCAL OUTPUT",
+                            show_label=False,
+                            type="filepath",
+                            interactive=False,
+                            elem_classes="image-frame"
+                        )
+
+                        t2i_status = gr.HTML(
+                            "",
+                            elem_classes="status-box"
+                        )
+
+                        t2i_privacy = gr.HTML(
+                            ledger_shell("t2i")
+                        )
+
+                        t2i_download = gr.File(
+                            label="LOCAL OUTPUT FILE",
+                            interactive=False
+                        )
+
+            # ========================================================
+            # IMAGE TO IMAGE
+            # ========================================================
+
+            with gr.Tab("IMAGE-TO-IMAGE"):
+
+                with gr.Row(equal_height=False):
+
+                    with gr.Column(scale=3, elem_classes="rack"):
+
+                        gr.HTML("""
+                        <div class="panel-heading">CONTROL RACK / TRANSFORM</div>
+                        <div style="color:#697584;font:10px 'JetBrains Mono',monospace;line-height:1.6;">
+                            LOCAL IMAGE TRANSFORMATION<br>
+                        </div>
+                        """)
+
+                        gr.HTML('<div class="panel-subheading">Source Image</div>')
+
+                        i2i_input = gr.Image(
+                            label="DROP SOURCE IMAGE",
+                            type="filepath",
+                            sources=["upload"],
+                            elem_classes="vault-image-input"
+                        )
+
+                        gr.HTML('<div class="panel-subheading">Transformation Prompt</div>')
+
+                        i2i_prompt = gr.Textbox(
+                            placeholder="Describe how the local image should be transformed...",
+                            lines=6,
+                            show_label=False,
+                            elem_classes="vault-input"
+                        )
+
+                        i2i_run = gr.Button(
+                            "APPLY LOCAL TRANSFORM",
+                            variant="primary",
+                            elem_classes="execute-btn"
+                        )
+                        i2i_clear = gr.Button(
+                            "CLEAR / RESET",
+                            variant="secondary"
+                        )
+
+                    with gr.Column(scale=7, elem_classes="viewport-panel"):
+
+                        i2i_pipeline_status = gr.HTML(
+                            pipeline_html(),
+                            elem_classes="pipeline-container"
+                        )
+
+                        i2i_output = gr.Image(
+                            label="TRANSFORMED OUTPUT",
+                            show_label=False,
+                            type="filepath",
+                            interactive=False,
+                            elem_classes="image-frame"
+                        )
+
+                        i2i_status = gr.HTML(
+                            "",
+                            elem_classes="status-box"
+                        )
+
+                        i2i_privacy = gr.HTML(
+                            ledger_shell("i2i")
+                        )
+
+                        i2i_download = gr.File(
+                            label="LOCAL OUTPUT FILE",
+                            interactive=False
+                        )
 
     # ============================================================
     # EVENTS
     # ============================================================
 
-    generate_t2i_btn.click(
-        fn=generate_t2i,
-        inputs=[prompt_t2i],
+    def run_t2i_ui(prompt):
+        result = generate_t2i(prompt)
+
+        output, prompt_html, safety_html, privacy_html_value, status, download = result
+
+        if "blocked" in status.lower() or "unsafe" in status.lower():
+            reason = status.replace("Generation blocked:", "").strip()
+            pipeline = pipeline_html(blocked=True, reason=reason)
+        else:
+            pipeline = pipeline_html()
+
+        combined_status = f"""
+        <div>
+            {prompt_html}
+            {safety_html}
+            <div style="margin-top:8px;color:#9AA5B1;">{status}</div>
+        </div>
+        """
+
+        return (
+            output,
+            pipeline,
+            combined_status,
+            privacy_html_value or ledger_shell("t2i"),
+            download
+        )
+
+    def run_i2i_ui(image, prompt):
+        result = generate_i2i(image, prompt)
+
+        output, prompt_html, safety_html, privacy_html_value, status, download = result
+
+        if "blocked" in status.lower() or "unsafe" in status.lower():
+            reason = status.replace("Generation blocked:", "").strip()
+            pipeline = pipeline_html(blocked=True, reason=reason)
+        else:
+            pipeline = pipeline_html()
+
+        combined_status = f"""
+        <div>
+            {prompt_html}
+            {safety_html}
+            <div style="margin-top:8px;color:#9AA5B1;">{status}</div>
+        </div>
+        """
+
+        return (
+            output,
+            pipeline,
+            combined_status,
+            privacy_html_value or ledger_shell("i2i"),
+            download
+        )
+
+    t2i_run.click(
+        fn=run_t2i_ui,
+        inputs=[t2i_prompt],
         outputs=[
             t2i_output,
-            t2i_prompt_status,
-            t2i_output_status,
+            t2i_pipeline_status,
+            t2i_status,
             t2i_privacy,
-            t2i_message,
             t2i_download
-        ]
+        ],
+        show_progress="full"
     )
 
-    regenerate_t2i_btn.click(
-        fn=generate_t2i,
-        inputs=[prompt_t2i],
+    i2i_run.click(
+        fn=run_i2i_ui,
+        inputs=[i2i_input, i2i_prompt],
         outputs=[
-            t2i_output,
-            t2i_prompt_status,
-            t2i_output_status,
-            t2i_privacy,
-            t2i_message,
-            t2i_download
-        ]
+            i2i_output,
+            i2i_pipeline_status,
+            i2i_status,
+            i2i_privacy,
+            i2i_download
+        ],
+        show_progress="full"
     )
 
-    clear_t2i_btn.click(
+    t2i_clear.click(
         fn=clear_t2i,
-        inputs=[],
         outputs=[
             t2i_output,
-            t2i_prompt_status,
-            t2i_output_status,
+            t2i_status,
+            t2i_pipeline_status,
             t2i_privacy,
-            t2i_message,
             t2i_download
         ]
     )
 
-
-    generate_i2i_btn.click(
-        fn=generate_i2i,
-        inputs=[i2i_input, prompt_i2i],
-        outputs=[
-            i2i_output,
-            i2i_prompt_status,
-            i2i_output_status,
-            i2i_privacy,
-            i2i_message,
-            i2i_download
-        ]
-    )
-
-    regenerate_i2i_btn.click(
-        fn=generate_i2i,
-        inputs=[i2i_input, prompt_i2i],
-        outputs=[
-            i2i_output,
-            i2i_prompt_status,
-            i2i_output_status,
-            i2i_privacy,
-            i2i_message,
-            i2i_download
-        ]
-    )
-
-    clear_i2i_btn.click(
+    i2i_clear.click(
         fn=clear_i2i,
-        inputs=[],
         outputs=[
             i2i_output,
-            i2i_prompt_status,
-            i2i_output_status,
+            i2i_status,
+            i2i_pipeline_status,
             i2i_privacy,
-            i2i_message,
             i2i_download
         ]
     )
@@ -1496,17 +1057,35 @@ with gr.Blocks(title="WITHIN") as app:
 # ============================================================
 
 if __name__ == "__main__":
+    print("")
+    print("=" * 62)
+    print("WITHIN â€” AIR-GAPPED VAULT")
+    print("Privacy by Architecture. Safe by Design.")
+    print("=" * 62)
+    print("Local inference: READY")
+    print("Safety checker: LOCAL")
+    print("Network dependency: NOT REQUIRED FOR INFERENCE")
+    print("UI: http://127.0.0.1:7861")
+    print("=" * 62)
+
     app.launch(
         server_name="127.0.0.1",
         server_port=7861,
-        inbrowser=True,
-        show_error=True,
-        css=CSS,
-        theme=gr.themes.Base(
-            primary_hue="neutral",
-            secondary_hue="neutral",
-            neutral_hue="neutral"
-        )
+        inbrowser=True
     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
