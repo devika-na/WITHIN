@@ -1,0 +1,29 @@
+﻿.venv/
+__pycache__/
+*.pyc
+
+models/
+outputs/
+receipts/
+
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+.gradio/
+.DS_Store
+Thumbs.db
+
+.env
+.env.*
+
+.vscode/
+.idea/
+
+# Local UI/backend backups
+app_*backup.py
+app_before_*.py
+
+# Local backup copies
+app_*.py
