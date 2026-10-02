@@ -169,15 +169,28 @@ Activate it on Windows:
 
 pip install -r requirements.txt
 
-4. Add the required local model files
+### 4. Add the required local model
 
-WITHIN expects its required model components to be available locally under the project's model directory.
+WITHIN uses the Stable Diffusion v1.5 model locally.
 
-The model files are not stored in Git because of their size.
+Obtain the Diffusers-format model from the official Hugging Face model repository:
 
-5. Run
+https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5
 
+Place the complete Diffusers model directory at:
+
+models/
+  stable-diffusion-v1-5/
+
+The local model directory should contain the model components and configuration required by the Diffusers pipeline.
+
+The model files are intentionally excluded from Git because of their large size.
+
+### 5. Run
+
+```powershell
 python app.py
+
 
 The Gradio interface will start locally.
 
