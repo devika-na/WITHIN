@@ -18,6 +18,9 @@ class PromptSafetyChecker:
             ],
             "self-harm": [
                 r"\bself[- ]harm\b",
+                r"\bself[- ]harming\b",
+                r"\bself[- ]harming\b",
+                r"\bself[- ]harmed\b", 
                 r"\bsuicide\b",
                 r"\bkill myself\b",
                 r"\bself[- ]injury\b",
@@ -25,6 +28,15 @@ class PromptSafetyChecker:
                 r"\bhurt themselves\b",
                 r"\bharm themselves\b",
                 r"\bharming themselves\b",
+            ],
+            "violent wrongdoing": [
+                r"\bkilling someone\b",
+                r"\bkill someone\b",
+                r"\bmurder someone\b",
+                r"\bmurder\b",
+                r"\bassassinate\b",
+                r"\bstab someone\b",
+                r"\bshoot someone\b",
             ],
             "graphic violence": [
                 r"\bgraphic violence\b",
