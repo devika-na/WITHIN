@@ -1,8 +1,21 @@
 import re
+from pathlib import Path
+
+from safety.instruction_safety import InstructionSafetyChecker
 
 
 class PromptSafetyChecker:
     def __init__(self):
+        base_dir = Path(__file__).resolve().parent.parent
+        self.policy_path = base_dir / "INSTRUCTION.md"
+
+        if not self.policy_path.exists():
+            raise FileNotFoundError(
+                f"WITHIN safety policy not found: {self.policy_path}"
+            )
+
+        self.instruction_checker = InstructionSafetyChecker()
+
         self.block_patterns = {
             "sexual content": [
                 r"\bexplicit sexual\b",
@@ -19,8 +32,7 @@ class PromptSafetyChecker:
             "self-harm": [
                 r"\bself[- ]harm\b",
                 r"\bself[- ]harming\b",
-                r"\bself[- ]harming\b",
-                r"\bself[- ]harmed\b", 
+                r"\bself[- ]harmed\b",
                 r"\bsuicide\b",
                 r"\bkill myself\b",
                 r"\bself[- ]injury\b",
@@ -58,6 +70,12 @@ class PromptSafetyChecker:
                 r"\bdismemberment\b",
                 r"\bdecapitation\b",
             ],
+            "illegal activity": [
+                r"\bhow to make.*bomb\b",
+                r"\bhow to make.*explosive\b",
+                r"\bdrug manufacturing\b",
+            ],
+        
             "non-consensual intimate content": [
                 r"\bnon[- ]consensual.*intimate\b",
                 r"\bnon[- ]consensual.*sexual\b",
@@ -80,36 +98,64 @@ class PromptSafetyChecker:
                 r"\bimpersonate\b",
                 r"\bfake.*celebrity\b",
             ],
-            "illegal activity": [
-                r"\bhow to make.*bomb\b",
-                r"\bhow to make.*explosive\b",
-                r"\bdrug manufacturing\b",
-            ],
-        }
+            }
 
     def check(self, prompt):
         normalized = " ".join(prompt.lower().split())
 
+        # Deterministic rules provide a secondary enforcement layer.
         for category, patterns in self.block_patterns.items():
             for pattern in patterns:
                 if re.search(pattern, normalized):
                     return {
                         "decision": "BLOCK",
                         "category": category,
-                        "reason": "High-risk content detected"
+                        "reason": "Blocked by deterministic safety enforcement",
+                        "policy": str(self.policy_path),
+                        "evaluator": "local-policy-rules",
                     }
 
+        # Primary instruction-based local AI evaluation.
+        ai_result = self.instruction_checker.check(prompt)
+        decision = ai_result["decision"]
+
+        if decision == "BLOCK":
+            return {
+                "decision": "BLOCK",
+                "category": "instruction-policy",
+                "reason": "Blocked by local instruction-based safety evaluator",
+                "policy": str(self.policy_path),
+                "evaluator": "local-qwen-instruction-policy",
+                "raw_response": ai_result["raw_response"],
+            }
+
+        if decision == "RESTRICT":
+            return {
+                "decision": "RESTRICT",
+                "category": "instruction-policy",
+                "reason": "Restricted by local instruction-based safety evaluator",
+                "policy": str(self.policy_path),
+                "evaluator": "local-qwen-instruction-policy",
+                "raw_response": ai_result["raw_response"],
+            }
+
+        # Secondary deterministic restriction check.
         for category, patterns in self.restrict_patterns.items():
             for pattern in patterns:
                 if re.search(pattern, normalized):
                     return {
                         "decision": "RESTRICT",
                         "category": category,
-                        "reason": "Sensitive content detected"
+                        "reason": "Restricted by deterministic safety enforcement",
+                        "policy": str(self.policy_path),
+                        "evaluator": "local-policy-rules",
                     }
 
         return {
             "decision": "ALLOW",
             "category": None,
-            "reason": "No restricted content detected"
+            "reason": "Allowed by local instruction-based safety evaluator",
+            "policy": str(self.policy_path),
+            "evaluator": "local-qwen-instruction-policy",
+            "raw_response": ai_result["raw_response"],
         }

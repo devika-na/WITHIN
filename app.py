@@ -1,6 +1,8 @@
 ﻿import time
+import gc
 from pathlib import Path
 
+import torch
 import gradio as gr
 
 from within.t2i_pipeline import WITHINT2IPipeline
@@ -17,8 +19,48 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 print("Initializing WITHIN...")
 
-t2i_pipeline = WITHINT2IPipeline()
-i2i_pipeline = WITHINI2IPipeline()
+t2i_pipeline = None
+i2i_pipeline = None
+
+def unload_pipeline(pipeline):
+    if pipeline is not None:
+        del pipeline
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
+def load_t2i_pipeline():
+    global t2i_pipeline, i2i_pipeline
+
+    if i2i_pipeline is not None:
+        print("Unloading I2I pipeline...")
+        unload_pipeline(i2i_pipeline)
+        i2i_pipeline = None
+
+    if t2i_pipeline is None:
+        print("Loading T2I pipeline...")
+        t2i_pipeline = WITHINT2IPipeline()
+
+    return t2i_pipeline
+
+
+def load_i2i_pipeline():
+    global t2i_pipeline, i2i_pipeline
+
+    if t2i_pipeline is not None:
+        print("Unloading T2I pipeline...")
+        unload_pipeline(t2i_pipeline)
+        t2i_pipeline = None
+
+    if i2i_pipeline is None:
+        print("Loading I2I pipeline...")
+        i2i_pipeline = WITHINI2IPipeline()
+
+    return i2i_pipeline
+
 
 print("WITHIN ready.")
 
@@ -139,7 +181,9 @@ def generate_t2i(prompt):
     output_path = OUTPUT_DIR / "within_t2i_final.png"
 
     try:
-        result = t2i_pipeline.generate(
+        pipeline = load_t2i_pipeline()
+
+        result = pipeline.generate(
             prompt=prompt,
             output_path=output_path
         )
@@ -208,7 +252,9 @@ def generate_i2i(input_image, prompt):
     output_path = OUTPUT_DIR / "within_i2i_final.png"
 
     try:
-        result = i2i_pipeline.generate(
+        pipeline = load_i2i_pipeline()
+
+        result = pipeline.generate(
             prompt=prompt,
             input_path=input_path,
             output_path=output_path
@@ -1073,6 +1119,7 @@ if __name__ == "__main__":
         server_port=7861,
         inbrowser=True
     )
+
 
 
 

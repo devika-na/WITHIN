@@ -22,7 +22,7 @@ class WITHINT2IPipeline:
 
         prompt_result = self.prompt_safety.check(prompt)
 
-        if prompt_result["decision"] == "BLOCK":
+        if prompt_result["decision"] in ["BLOCK", "RESTRICT"]:
             print("Prompt blocked before generation.")
 
             return {

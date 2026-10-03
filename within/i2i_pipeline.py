@@ -29,9 +29,8 @@ class WITHINI2IPipeline:
 
         prompt_result = self.prompt_safety.check(prompt)
 
-        if prompt_result["decision"] == "BLOCK":
-            print("Prompt blocked before generation.")
-
+        if prompt_result["decision"] in ["BLOCK", "RESTRICT"]:
+            print("Prompt rejected before generation.")
             return {
                 "status": "BLOCKED",
                 "reason": prompt_result["reason"],
